@@ -17,8 +17,11 @@
 | 領域 | 技術 |
 |---|---|
 | フロントエンド | Next.js (React) + Tailwind CSS |
-| バックエンド・DB | Supabase (PostgreSQL) |
-| 定期処理 | Supabase pg_cron |
+| バックエンド | Node.js + Express / Hono |
+| DB | PostgreSQL (自前構成) |
+| ORM | Prisma |
+| 認証 | JWT |
+| 定期処理 | node-cron |
 | メール通知 | Resend |
 | AI | Gemini API |
 | ホスティング | Vercel |
@@ -29,12 +32,16 @@
 
 ```
 site_praciting/
-├── CLAUDE.md
+├── .gitignore
+├── package.json             # ルート（npm workspaces）
 ├── docs/
-│   ├── 要件定義書.md       # 機能・非機能要件の全詳細
-│   ├── schema.sql          # DBスキーマ（Supabase/PostgreSQL）
-│   └── DBERfigure.png      # ER図
-└── my-next-app/            # Next.jsアプリ本体
+│   ├── CLAUDE.md
+│   ├── 要件定義書.md        # 機能・非機能要件の全詳細
+│   ├── schema.sql           # DBスキーマ（PostgreSQL）
+│   └── DBERfigure.png       # ER図
+└── src/
+    ├── frontend/            # Next.jsアプリ
+    └── backend/             # Express / Hono API
 ```
 
 ---
@@ -69,15 +76,12 @@ site_praciting/
 | `exchange_rates` | 為替レート（日次） |
 | `categories` | サブスクカテゴリ |
 
-全テーブルにRLS（行レベルセキュリティ）を設定済み。
-
 ---
 
 ## 認証
 
-- Supabase Auth（メール認証）
-- `profiles` テーブルは `auth.users.id` を参照
-- RLSで他ユーザーのデータへのアクセスを完全遮断
+- JWT（JSON Web Token）によるメール認証
+- アクセス制御はアプリケーション層で実装
 
 ---
 
