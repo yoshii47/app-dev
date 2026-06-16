@@ -16,7 +16,7 @@ CREATE TYPE cancellation_difficulty_type AS ENUM ('easy', 'medium', 'hard');
 --    Supabase Auth の auth.users を拡張するユーザー情報テーブル
 -- --------------------------------------------------------
 CREATE TABLE profiles (
-    id                      UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     display_name            VARCHAR(255),
     mode                    VARCHAR(20) NOT NULL DEFAULT 'individual'
                                 CHECK (mode IN ('individual', 'household')),
@@ -210,75 +210,7 @@ CREATE TABLE notification_tokens (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ============================================================
--- ROW LEVEL SECURITY (RLS)
--- ============================================================
 
-ALTER TABLE profiles             ENABLE ROW LEVEL SECURITY;
-ALTER TABLE households           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE household_members    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE subscriptions        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE subscription_prices  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE check_ins            ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cost_scores          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notification_logs    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notification_tokens  ENABLE ROW LEVEL SECURITY;
-
--- profiles: 自分のレコードのみ
-CREATE POLICY "profiles: own record" ON profiles
-    USING (id = auth.uid());
-
--- households: 自分が owner または メンバー
-CREATE POLICY "households: member access" ON households
-    USING (
-        owner_id = auth.uid()
-        OR id IN (SELECT household_id FROM household_members WHERE user_id = auth.uid())
-    );
-
--- household_members: 自分が所属する世帯のレコードのみ
-CREATE POLICY "household_members: own household" ON household_members
-    USING (
-        user_id = auth.uid()
-        OR household_id IN (SELECT id FROM households WHERE owner_id = auth.uid())
-    );
-
--- subscriptions: 自分のサブスク、または世帯共有サブスク
-CREATE POLICY "subscriptions: own or household" ON subscriptions
-    USING (
-        user_id = auth.uid()
-        OR (
-            household_id IS NOT NULL
-            AND household_id IN (
-                SELECT household_id FROM household_members WHERE user_id = auth.uid()
-                UNION
-                SELECT id FROM households WHERE owner_id = auth.uid()
-            )
-        )
-    );
-
--- subscription_prices: subscriptions 経由でアクセス権を確認
-CREATE POLICY "subscription_prices: via subscription" ON subscription_prices
-    USING (
-        subscription_id IN (SELECT id FROM subscriptions)
-    );
-
--- check_ins: 自分の回答のみ
-CREATE POLICY "check_ins: own records" ON check_ins
-    USING (user_id = auth.uid());
-
--- cost_scores: subscriptions 経由でアクセス権を確認
-CREATE POLICY "cost_scores: via subscription" ON cost_scores
-    USING (
-        subscription_id IN (SELECT id FROM subscriptions)
-    );
-
--- notification_logs: 自分宛てのみ
-CREATE POLICY "notification_logs: own records" ON notification_logs
-    USING (user_id = auth.uid());
-
--- notification_tokens: 自分のトークンのみ
-CREATE POLICY "notification_tokens: own records" ON notification_tokens
-    USING (user_id = auth.uid());
 
 -- ============================================================
 -- INDEXES
