@@ -1,3 +1,14 @@
+// DB接続の設定
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+// .envを読む方法の手段
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const port = 3000;
