@@ -18,3 +18,7 @@ build/
 # Logs
 *.log
 
+# claude skill
+.claude/skills
+
+

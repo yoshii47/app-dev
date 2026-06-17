@@ -1,0 +1,5 @@
+{
+  "document_json": "/tmp/tech_stack_document.json",
+  "output_docx": "/Users/yoshikawahobu/Desktop/work/programming/practice/site_praciting/output/tech_stack_and_learning_roadmap.docx",
+  "rerun_cmd": "python3 /Users/yoshikawahobu/Desktop/work/programming/practice/site_praciting/.claude/skills/docx-creator/scripts/create_docx.py /tmp/tech_stack_document.json /Users/yoshikawahobu/Desktop/work/programming/practice/site_praciting/output/tech_stack_and_learning_roadmap.docx"
+}

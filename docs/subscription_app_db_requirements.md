@@ -9,7 +9,7 @@
 ## 1. 概要
 
 サブスクリプションを一元管理し、解約・継続の意思決定を補助するWebアプリケーション。  
-使用技術：Supabase（PostgreSQL）、Next.js、Gemini API、Resend
+使用技術：PostgreSQL（Neon）、Next.js、Express、Gemini API、Resend
 
 **重要な設計方針：**
 - すべてのテーブルのPKは **UUID** で統一
@@ -44,7 +44,7 @@
 - custom_cycle_days: INT (custom の場合のみ有効)
 - custom_cycle_text: VARCHAR(100) (例："30日固定", "2週間トライアル")
 - start_date: DATE
-- next_billing_date: DATE (pg_cronで毎日更新)
+- next_billing_date: DATE (node-cronで毎日更新)
 - continuation_level: VARCHAR(50) (ユーザー入力の継続予定度)
 - is_archived: BOOLEAN (DEFAULT: false)
 - created_at: TIMESTAMP
@@ -101,7 +101,7 @@
 ```
 
 **運用ルール：**
-- 毎営業日14時に自動取得（pg_cron）
+- 毎営業日14時に自動取得（node-cron）
 - 土日祝は直前営業日のレートを is_official=false で参照
 - Yahoo Finance API を使用
 
@@ -281,7 +281,7 @@ subscription_prices は INSERT のみ（UPDATE しない）
 **バックエンド実装段階（後）：**
 - スコア算出アルゴリズム
 - Gemini API連携
-- pg_cron での自動計算タイミング
+- node-cron での自動計算タイミング
 
 スキーマ設計時は「何を保存するか」に集中。「どう計算するか」は考えない。
 
@@ -304,7 +304,7 @@ ENUM('monthly', 'yearly', 'custom')
 custom の場合：
   - custom_cycle_days に日数を記録（30, 14等）
   - custom_cycle_text に説明を記録（"30日固定", "2週間トライアル"等）
-  - next_billing_date を pg_cron で毎日更新
+  - next_billing_date を node-cron で毎日更新
 ```
 
 ---
@@ -316,7 +316,7 @@ custom の場合：
 理由：
 - グローバルに一意（分散DB対応）
 - セキュアで可読性が高い
-- Supabase の標準実装 `gen_random_uuid()`
+- PostgreSQL標準の `gen_random_uuid()`（pg13+）
 
 ---
 
@@ -350,13 +350,14 @@ custom の場合：
 
 ## 8. データベースエンジン
 
-**Supabase（PostgreSQL）**
+**PostgreSQL（Neon / サーバーレス）**
 
 使用する PostgreSQL 固有機能：
 - UUID 型 + gen_random_uuid()
 - ENUM 型
-- pg_cron による定期実行
 - TIMESTAMPTZ サポート
+
+※ 定期実行は DB の pg_cron ではなく、アプリ層の node-cron で行う。
 
 ---
 
@@ -371,12 +372,12 @@ custom の場合：
 
 3. **SQL スキーマ実装**
    - CREATE TABLE 文を全て記述
-   - Supabase に適用
+   - Neon に適用（Phase1〜2はpgで直接、Phase3以降はPrisma Migrate）
 
 4. **バックエンド処理実装**
    - アルゴリズム
    - API連携
-   - pg_cron ジョブ
+   - node-cron ジョブ
 
 ---
 
