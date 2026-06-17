@@ -1,5 +1,5 @@
 -- ============================================================
--- Supabase / PostgreSQL Schema
+-- PostgreSQL Schema (Neon)
 -- ============================================================
 
 -- --------------------------------------------------------
@@ -13,7 +13,7 @@ CREATE TYPE cancellation_difficulty_type AS ENUM ('easy', 'medium', 'hard');
 
 -- --------------------------------------------------------
 -- 1. profiles
---    Supabase Auth の auth.users を拡張するユーザー情報テーブル
+--    ユーザー情報テーブル（認証はJWTで自前実装）
 -- --------------------------------------------------------
 CREATE TABLE profiles (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),

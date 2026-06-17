@@ -17,10 +17,10 @@
 | 領域 | 技術 |
 |---|---|
 | フロントエンド | Next.js (React) + Tailwind CSS |
-| バックエンド | Node.js + Express / Hono |
-| DB | PostgreSQL (自前構成) |
-| ORM | Prisma |
-| 認証 | JWT |
+| バックエンド | Node.js + Express |
+| DB | PostgreSQL (Neon / サーバーレス) |
+| DBアクセス | Phase1〜2は node-postgres (pg) の生SQL → Phase3でPrisma導入 |
+| 認証 | JWT (自前実装) |
 | 定期処理 | node-cron |
 | メール通知 | Resend |
 | AI | Gemini API |
@@ -63,7 +63,7 @@ site_praciting/
 
 | テーブル | 役割 |
 |---|---|
-| `profiles` | Supabase Auth拡張。個人/世帯モード、見直し設定を保持 |
+| `profiles` | ユーザー情報。個人/世帯モード、見直し設定を保持 |
 | `households` / `household_members` | 世帯モードのグループ管理 |
 | `subscriptions` | サブスク登録情報（課金サイクル・次回請求日・継続予定レベル等） |
 | `subscription_prices` | 料金履歴（値上げ対応、外貨換算含む） |
