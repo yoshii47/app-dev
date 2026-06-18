@@ -12,18 +12,29 @@ CREATE TYPE notification_decision_type AS ENUM ('continue', 'cancel', 'defer_1mo
 CREATE TYPE cancellation_difficulty_type AS ENUM ('easy', 'medium', 'hard');
 
 -- --------------------------------------------------------
+-- 1.users
+--   ユーザ情報テーブル(認証)
+-- --------------------------------------------------------
+CREATE TABLE users (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email                   VARCHAR(255) NOT NULL UNIQUE,
+    password_hash           VARCHAR(255) NOT NULL,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- --------------------------------------------------------
 -- 1. profiles
 --    ユーザー情報テーブル（認証はJWTで自前実装）
 -- --------------------------------------------------------
 CREATE TABLE profiles (
-    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                      UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     display_name            VARCHAR(255),
     mode                    VARCHAR(20) NOT NULL DEFAULT 'individual'
                                 CHECK (mode IN ('individual', 'household')),
     household_id            UUID,                           -- 世帯モード時に参照
     review_candidate_count  INT NOT NULL DEFAULT 3,         -- 見直し候補の表示件数
     review_score_threshold  INT NOT NULL DEFAULT 40,        -- 見直し候補のスコア閾値
-    created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
