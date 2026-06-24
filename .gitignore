@@ -19,6 +19,6 @@ build/
 *.log
 
 # claude skill
-.claude/skills
-
+.claude
+.agent
 
