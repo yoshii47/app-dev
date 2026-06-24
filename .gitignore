@@ -20,5 +20,5 @@ build/
 
 # claude skill
 .claude
-.agent
+.agents
 
